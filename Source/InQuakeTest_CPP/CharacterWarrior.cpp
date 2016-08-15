@@ -117,6 +117,7 @@ void ACharacterWarrior::Server_Attack()
 		}
 	}
 	Client_SyncMeeleeCooldown(MeeleeCooldown - Latency);
+	Client_AttackAnimation();
 
 	//find players that will be damaged by this attack
 	for (TActorIterator<ACharacterWarrior> Itr(GetWorld()); Itr; ++Itr) {
@@ -152,6 +153,7 @@ void ACharacterWarrior::Server_Shoot(const FVector & TargetPoint)
 		}
 	}
 	Client_SyncShootCooldown(ShootCooldown - Latency);
+	Client_ShootAnimation();
 	if (RealProjectileClass) {
 		FActorSpawnParameters SpawnParam = FActorSpawnParameters();
 		SpawnParam.Instigator = this;
@@ -179,9 +181,30 @@ TWeakObjectPtr<AFakeProjectile> ACharacterWarrior::PopFakeProjectile()
 	}
 }
 
-void ACharacterWarrior::Client_Die_Implementation()
+void ACharacterWarrior::Client_AttackAnimation_Implementation()
 {
+	//on owner animation already played
+	if (Role == ROLE_AutonomousProxy) {
+		return;
+	}
+	if (AttackAnim) {
+		PlayAnimMontage(AttackAnim);
+	} else {
+		check(false);
+	}
+}
 
+void ACharacterWarrior::Client_ShootAnimation_Implementation()
+{
+	//on owner animation already played
+	if (Role == ROLE_AutonomousProxy) {
+		return;
+	}
+	if (ShootAnim) {
+		PlayAnimMontage(ShootAnim);
+	} else {
+		check(false);
+	}
 }
 
 float ACharacterWarrior::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -207,7 +230,6 @@ float ACharacterWarrior::TakeDamage(float DamageAmount, FDamageEvent const & Dam
 			check(false);
 		}
 		
-
 		//quick and dirty "respawn"
 		Health = MaxHealth;
 		MeeleeCooldown = (GameState.IsValid() ? GameState->DefaultMeeleeCooldown : 0.f);

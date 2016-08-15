@@ -136,8 +136,13 @@ public:
 	/** Sync shoot cooldown on client to server */
 	UFUNCTION(Client, Reliable)
 		void Client_SyncShootCooldown(float NewCooldown);
-	
-	/** Sync shoot cooldown on client to server */
-	UFUNCTION(NetMulticast, Reliable)
-		void Client_Die();
+
+	/** Attack animation on clients (except owner) */
+	UFUNCTION(NetMulticast, Unreliable)
+		void Client_AttackAnimation();
+
+
+	/** Shoot animation on clients (except owner) */
+	UFUNCTION(NetMulticast, Unreliable)
+		void Client_ShootAnimation();
 };
